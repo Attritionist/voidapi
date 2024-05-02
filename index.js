@@ -4,7 +4,7 @@ const rateLimit = require('express-rate-limit');
 const cache = require('memory-cache');
 const app = express();
 const port = 3000;
-const BASESCAN_API_KEY = process.env["ETHERSCAN_API_KEY"];
+const BASESCAN_API_KEY = process.env["BASESCAN_API_KEY"];
 
 
 const MAX_SUPPLY = 100000000; // Set your actual max supply here
