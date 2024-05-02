@@ -4,11 +4,12 @@ const rateLimit = require('express-rate-limit');
 const cache = require('memory-cache');
 const app = express();
 const port = 3000;
+const BASESCAN_API_KEY = process.env["ETHERSCAN_API_KEY"];
+
 
 const MAX_SUPPLY = 100000000; // Set your actual max supply here
 const BURN_WALLET = '0x0000000000000000000000000000000000000000';
 const VOID_CONTRACT_ADDRESS = '0x21eceaf3bf88ef0797e3927d855ca5bb569a47fc';
-const BASESCAN_API_KEY = '8PDS3RB8W8AZFMEICBADAYRXD4VMJX5MJJ'; // Replace with your BaseScan API key
 const BASESCAN_API_URL = `https://api.basescan.org/api?module=account&action=tokenbalance&contractaddress=${VOID_CONTRACT_ADDRESS}&address=${BURN_WALLET}&tag=latest&apikey=${BASESCAN_API_KEY}`;
 
 const limiter = rateLimit({
