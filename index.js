@@ -6,7 +6,6 @@ const app = express();
 const port = 3000;
 const BASESCAN_API_KEY = process.env["BASESCAN_API_KEY"];
 
-
 const MAX_SUPPLY = 100000000; // Set your actual max supply here
 const BURN_WALLET = '0x0000000000000000000000000000000000000000';
 const VOID_CONTRACT_ADDRESS = '0x21eceaf3bf88ef0797e3927d855ca5bb569a47fc';
@@ -21,6 +20,8 @@ const limiter = rateLimit({
 app.use(limiter);
 
 app.get('/api/circulating-supply', async (req, res) => {
+    res.header('Access-Control-Allow-Origin', '*');
+
     const cachedResponse = cache.get('circulatingSupply');
     if (cachedResponse) {
         return res.json(cachedResponse);
