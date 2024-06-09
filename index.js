@@ -30,7 +30,6 @@ const LIQUIDITY_POOLS = [
     '0x53a631150d7cbcC1d1C125c6C14369612C93C7b3',
     '0x22209e375160aB400c97C4684ff91B6320eE7D9D',
     '0x39f0c947fcea3Ca8AA6B9eaA9045a95709B6F59a',
-    '0x90D5A12ae6f1E066737a131a89a636B56036d88b',
 ];
 const limiter = rateLimit({
     windowMs: 10 * 60 * 1000, // 15 minutes
