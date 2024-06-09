@@ -93,7 +93,7 @@ app.get('/api/pool-supply', async (req, res) => {
 });
 
 async function getPoolBalances() {
-    const poolBalancesPromises = LIQUIDITY_POOLS.map(poolAddress => 
+    const poolBalancesPromises = LIQUIDITY_POOLS.map(poolAddress =>
         poolQueue.add({ poolAddress })
     );
 
@@ -105,8 +105,12 @@ async function getPoolBalances() {
 poolQueue.process(3, async (job) => { // Process up to 3 jobs concurrently
     const { poolAddress } = job.data;
     const poolApiUrl = `https://api.basescan.org/api?module=account&action=tokenbalance&contractaddress=${VOID_CONTRACT_ADDRESS}&address=${poolAddress}&tag=latest&apikey=${BASESCAN_API_KEY}`;
-    const response = await axios.get(poolApiUrl);
-    return parseInt(response.data.result) / 1e18; // Correctly handle token decimals
+    try {
+        const response = await axios.get(poolApiUrl);
+        return parseFloat(response.data.result) / 1e18; // Correctly handle token decimals
+    } catch (error) {
+        throw new Error(`Failed to fetch data for pool address ${poolAddress}: ${error.message}`);
+    }
 });
 
 app.listen(port, () => {
