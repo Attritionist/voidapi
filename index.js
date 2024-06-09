@@ -47,13 +47,16 @@ app.get('/api/circulating-supply', async (req, res) => {
 // Queue for handling API requests
 const poolQueue = new Queue('pool-supply-queue', {
     limiter: {
-        max: 1,
+        max: 3,
         duration: 1000,
     },
     defaultJobOptions: {
         removeOnComplete: true,
         removeOnFail: true,
     },
+    settings: {
+        maxStalledCount: 0, // Disable automatic retries on stalled jobs
+    }
 });
 
 // Fetch pool balances and cache the result
