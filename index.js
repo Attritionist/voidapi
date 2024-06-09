@@ -4,7 +4,7 @@ const rateLimit = require('express-rate-limit');
 const cache = require('memory-cache');
 const Queue = require('bull');
 const app = express();
-const port = 3001;
+const port = 3000;
 const BASESCAN_API_KEY = process.env["BASESCAN_API_KEY"];
 
 const MAX_SUPPLY = 100000000; // Set your actual max supply here
@@ -61,9 +61,6 @@ app.get('/api/circulating-supply', async (req, res) => {
     }
 });
 
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
 // Queue for handling API requests
 const poolQueue = new Queue('pool-supply-queue', {
     limiter: {
