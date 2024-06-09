@@ -64,7 +64,7 @@ app.get('/api/circulating-supply', async (req, res) => {
 // Queue for handling API requests
 const poolQueue = new Queue('pool-supply-queue', {
     limiter: {
-        max: 5,
+        max: 3,
         duration: 1000,
     },
     defaultJobOptions: {
@@ -103,11 +103,11 @@ async function getPoolBalances() {
 }
 
 // Process queue jobs
-poolQueue.process(async (job) => {
+poolQueue.process(3, async (job) => { // Process up to 3 jobs concurrently
     const { poolAddress } = job.data;
     const poolApiUrl = `https://api.basescan.org/api?module=account&action=tokenbalance&contractaddress=${VOID_CONTRACT_ADDRESS}&address=${poolAddress}&tag=latest&apikey=${BASESCAN_API_KEY}`;
     const response = await axios.get(poolApiUrl);
-    return parseInt(response.data.result) / 1e18; // Adjust this based on the token's decimals
+    return parseInt(response.data.result) / 1e18; // Correctly handle token decimals
 });
 
 app.listen(port, () => {
