@@ -18,11 +18,17 @@ const LIQUIDITY_POOLS = [
 
 const limiter = rateLimit({
     windowMs: 10 * 60 * 1000, // 10 minutes
-    max: 10000 // limit each IP to 10000 requests per windowMs
+    max: 10000, // limit each IP to 10000 requests per windowMs
+    skipSuccessfulRequests: true, // Skip rate limiting for successful requests
 });
 
-// Apply the rate limiting middleware to all requests except /api/pool-supply
-app.use(limiter.unless({ path: '/api/pool-supply' }));
+// Apply the rate limiting middleware to all requests
+app.use(limiter);
+
+// Exclude /api/pool-supply from rate limiting
+app.use('/api/pool-supply', (req, res, next) => {
+    next();
+});
 
 app.get('/api/circulating-supply', async (req, res) => {
     res.header('Access-Control-Allow-Origin', '*');
