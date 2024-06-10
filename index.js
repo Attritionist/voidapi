@@ -21,8 +21,8 @@ const limiter = rateLimit({
     max: 10000 // limit each IP to 10000 requests per windowMs
 });
 
-// Apply the rate limiting middleware to all requests
-app.use(limiter);
+// Apply the rate limiting middleware to all requests except /api/pool-supply
+app.use(limiter.unless({ path: '/api/pool-supply' }));
 
 app.get('/api/circulating-supply', async (req, res) => {
     res.header('Access-Control-Allow-Origin', '*');
@@ -64,6 +64,15 @@ const poolQueue = new Queue('pool-supply-queue', {
     }
 });
 
+// Invalidate poolSupply cache when a job is added or completed
+poolQueue.on('global:completed', () => {
+    cache.del('poolSupply');
+});
+
+poolQueue.on('global:failed', () => {
+    cache.del('poolSupply');
+});
+
 // Fetch pool balances and cache the result
 app.get('/api/pool-supply', async (req, res) => {
     res.header('Access-Control-Allow-Origin', '*');
@@ -80,17 +89,22 @@ app.get('/api/pool-supply', async (req, res) => {
         cache.put('poolSupply', { totalPoolSupply }, cacheDuration);
         res.json({ totalPoolSupply });
     } catch (error) {
+        console.error('Error fetching pool supply:', error);
         res.status(500).json({ error: 'Internal Server Error', details: error.message });
     }
 });
 
 async function getPoolBalances() {
-    const poolBalancesPromises = LIQUIDITY_POOLS.map(poolAddress =>
-        poolQueue.add({ poolAddress })
-    );
+    try {
+        const poolBalancesPromises = LIQUIDITY_POOLS.map(poolAddress =>
+            poolQueue.add({ poolAddress })
+        );
 
-    const poolBalancesResults = await Promise.all(poolBalancesPromises);
-    return poolBalancesResults.map(job => job.returnvalue);
+        const poolBalancesResults = await Promise.all(poolBalancesPromises);
+        return poolBalancesResults.map(job => job.returnvalue);
+    } catch (error) {
+        throw new Error('Failed to get pool balances:', error);
+    }
 }
 
 // Process queue jobs
