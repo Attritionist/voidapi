@@ -78,7 +78,7 @@ app.get('/api/pool-supply', async (req, res) => {
 }
 
         poolSupply /= 1e18; // Adjust this based on the token's decimals
-        const cacheDuration = 30 * 60 * 1000; // Cache for 30 minutes
+        const cacheDuration = 5 * 60 * 1000; // Cache for 30 minutes
         cache.put('poolSupply', { poolSupply }, cacheDuration);
         res.json({ poolSupply });
     } catch (error) {
