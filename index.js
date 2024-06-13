@@ -51,14 +51,14 @@ app.get('/api/circulating-supply', async (req, res) => {
     }
 });
 
-pp.get('/api/pool-supply', async (req, res) => {
+app.get('/api/pool-supply', async (req, res) => {
     res.header('Access-Control-Allow-Origin', '*');
     const cachedResponse = cache.get('poolSupply');
     if (cachedResponse) {
         return res.json(cachedResponse);
     }
     try {
-        const callsPerSecond = 4; // BaseScan API rate limit
+        const callsPerSecond = 4; // Capped at 4 calls per second for a safer approach
         const delay = 1000 / callsPerSecond; // Delay between each API call in milliseconds
         let poolSupply = 0;
 
