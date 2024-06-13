@@ -20,7 +20,7 @@ const LIQUIDITY_POOL_ADDRESSES = [
     '0xf2de7d73e8e56822afdf19fd08d999c78abd933b',
     '0x66fa42cfd1789aa7f87c1ef988bf04cb145c9465',
     '0x1f43031a6294b9c2219887c9e9f5b3671433df3c',
-    '0x7377ff4f6ac21c1be5d943482b3c439d080f65c1'
+    '0x7377ff4f6ac21c1be5d943482b3c439d080f65c1',
 ];
 
 const BASESCAN_API_URL = (address) => `https://api.basescan.org/api?module=account&action=tokenbalance&contractaddress=${VOID_CONTRACT_ADDRESS}&address=${address}&tag=latest&apikey=${BASESCAN_API_KEY}`;
@@ -44,7 +44,7 @@ app.get('/api/circulating-supply', async (req, res) => {
         const burnedTokens = parseInt(response.data.result) / 1e18; // Adjust this based on the token's decimals
         const circulatingSupply = MAX_SUPPLY - burnedTokens;
         const cacheDuration = 30 * 60 * 1000; // Cache for 30 minutes
-        cache.put('circulatingSupply', { circulatingSupply }, cacheDuration);
+        cache.put('circulatingSupply', { circulatingSupply }, cacheDuration);3
         res.json({ circulatingSupply });
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error', details: error.message });
@@ -58,15 +58,17 @@ app.get('/api/pool-supply', async (req, res) => {
         return res.json(cachedResponse);
     }
     try {
-        const callsPerSecond = 4; // Capped at 4 calls per second for a safer approach
+        const callsPerSecond = 3; // Capped at 4 calls per second for a safer approach
         const delay = 1000 / callsPerSecond; // Delay between each API call in milliseconds
         let poolSupply = 0;
 
         for (const address of LIQUIDITY_POOL_ADDRESSES) {
-            const response = await axios.get(BASESCAN_API_URL(address));
-            poolSupply += parseInt(response.data.result);
-            await new Promise(resolve => setTimeout(resolve, delay));
-        }
+    const response = await axios.get(BASESCAN_API_URL(address));
+    const tokenBalance = parseInt(response.data.result);
+    console.log(`Liquidity Pool Address: ${address}, Token Balance: ${tokenBalance}`);
+    poolSupply += tokenBalance;
+    await new Promise(resolve => setTimeout(resolve, delay));
+}
 
         poolSupply /= 1e18; // Adjust this based on the token's decimals
         const cacheDuration = 30 * 60 * 1000; // Cache for 30 minutes
