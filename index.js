@@ -24,6 +24,7 @@ const LIQUIDITY_POOL_ADDRESSES = [
     '0xe5fe953ca480d0a7b22ed664a7370a36038c13ae',
     '0xf2de7d73e8e56822afdf19fd08d999c78abd933b',
     '0x66fa42cfd1789aa7f87c1ef988bf04cb145c9465',
+    '0x928be5748ea9d03925a3b5f85e3a5e2502cd7bcf',
     '0x1f43031a6294b9c2219887c9e9f5b3671433df3c',
     '0x7377ff4f6ac21c1be5d943482b3c439d080f65c1',
     '0x87aF913718f73168D4566bBF51683792aC2680eB',
@@ -77,7 +78,7 @@ app.get('/api/pool-supply', async (req, res) => {
 }
 
         poolSupply /= 1e18; // Adjust this based on the token's decimals
-        const cacheDuration = 5 * 60 * 1000; // Cache for 30 minutes
+        const cacheDuration = 10 * 60 * 1000; // Cache for 30 minutes
         cache.put('poolSupply', { poolSupply }, cacheDuration);
         res.json({ poolSupply });
     } catch (error) {
