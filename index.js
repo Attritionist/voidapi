@@ -11,11 +11,7 @@ const VOID_CONTRACT_ADDRESS = '0x21eceaf3bf88ef0797e3927d855ca5bb569a47fc';
 const LIQUIDITY_POOL_ADDRESSES = [
     '0xb14e941d34d61ae251ccc08ac15b8455ae9f60a5',
     '0xa79e45668972e13cdb6c9ed1debfc5b0d04cb0bd',
-    '0x22209e375160aB400c97C4684ff91B6320eE7D9D',
-    '0x90D5A12ae6f1E066737a131a89a636B56036d88b',
-    '0xfc3696a5DC49A571a62Ef7164f9157ECF52b6ab2',
     '0x9858271D467e1786C5035618BFa30c18C7D4b215',
-    '0x39f0c947fcea3Ca8AA6B9eaA9045a95709B6F59a',
     '0x6d8b0d8825f8c8a885a2809fbf03983a9430f999',
     '0xa2b01d461b811096eab039f0283655326440e78f',
     '0x263ea0a3cf3845fc52a30c6e81dbd985b7290fbf',
@@ -27,7 +23,6 @@ const LIQUIDITY_POOL_ADDRESSES = [
     '0x928be5748ea9d03925a3b5f85e3a5e2502cd7bcf',
     '0x1f43031a6294b9c2219887c9e9f5b3671433df3c',
     '0x7377ff4f6ac21c1be5d943482b3c439d080f65c1',
-    '0x87aF913718f73168D4566bBF51683792aC2680eB',
 ];
 
 const BASESCAN_API_URL = (address) => `https://api.basescan.org/api?module=account&action=tokenbalance&contractaddress=${VOID_CONTRACT_ADDRESS}&address=${address}&tag=latest&apikey=${BASESCAN_API_KEY}`;
@@ -65,8 +60,7 @@ app.get('/api/pool-supply', async (req, res) => {
         return res.json(cachedResponse);
     }
     try {
-        const callsPerSecond = 4; // Capped at 4 calls per second for a safer approach
-        const delay = 1000 / callsPerSecond; // Delay between each API call in milliseconds
+        const delay = 500
         let poolSupply = 0;
 
         for (const address of LIQUIDITY_POOL_ADDRESSES) {
