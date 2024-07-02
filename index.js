@@ -23,7 +23,9 @@ const LIQUIDITY_POOL_ADDRESSES = [
     '0x928be5748ea9d03925a3b5f85e3a5e2502cd7bcf',
     '0x1f43031a6294b9c2219887c9e9f5b3671433df3c',
     '0x7377ff4f6ac21c1be5d943482b3c439d080f65c1',
+    '0x39f0c947fcea3ca8aa6b9eaa9045a95709b6f59a',
     '0x3c0f2679210c0bc074682ecb83b9e7d39411c478',
+    '0xA6d470b00963c0c082E93c3E985D287e677A9477',
 ];
 
 const BASESCAN_API_URL = (address) => `https://api.basescan.org/api?module=account&action=tokenbalance&contractaddress=${VOID_CONTRACT_ADDRESS}&address=${address}&tag=latest&apikey=${BASESCAN_API_KEY}`;
