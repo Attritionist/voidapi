@@ -33,7 +33,7 @@ const LIQUIDITY_POOL_ADDRESSES = [
 const BASESCAN_API_URL = (address) => `https://api.basescan.org/api?module=account&action=tokenbalance&contractaddress=${VOID_CONTRACT_ADDRESS}&address=${address}&tag=latest&apikey=${BASESCAN_API_KEY}`;
 
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 10 minutes
+    windowMs: 10 * 60 * 1000, // 10 minutes
     max: 10000 // limit each IP to 10000 requests per windowMs
 });
 
@@ -77,7 +77,7 @@ app.get('/api/pool-supply', async (req, res) => {
 }
 
         poolSupply /= 1e18; // Adjust this based on the token's decimals
-        const cacheDuration = 15 * 60 * 1000; // Cache for 15 minutes
+        const cacheDuration = 10 * 60 * 1000; // Cache for 15 minutes
         cache.put('poolSupply', { poolSupply }, cacheDuration);
         res.json({ poolSupply });
     } catch (error) {
