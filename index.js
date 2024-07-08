@@ -51,7 +51,7 @@ app.get('/api/circulating-supply', async (req, res) => {
         const burnedTokens = parseInt(response.data.result) / 1e18; // Adjust this based on the token's decimals
         const circulatingSupply = MAX_SUPPLY - burnedTokens;
         const cacheDuration = 30 * 60 * 1000; // Cache for 30 minutes
-        cache.put('circulatingSupply', { circulatingSupply }, cacheDuration);
+        cache.put('circulatingSupply', { circulatingSupply }, cacheDuration);3
         res.json({ circulatingSupply });
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error', details: error.message });
@@ -65,16 +65,18 @@ app.get('/api/pool-supply', async (req, res) => {
         return res.json(cachedResponse);
     }
     try {
-        const requests = LIQUIDITY_POOL_ADDRESSES.map(async (address) => {
-            const response = await axios.get(BASESCAN_API_URL(address));
-            const tokenBalance = parseInt(response.data.result);
-            console.log(`Liquidity Pool Address: ${address}, Token Balance: ${tokenBalance}`);
-            return tokenBalance;
-        });
+        const delay = 100
+        let poolSupply = 0;
 
-        const results = await Promise.all(requests);
-        const poolSupply = results.reduce((sum, balance) => sum + balance, 0) / 1e18; // Adjust this based on the token's decimals
+        for (const address of LIQUIDITY_POOL_ADDRESSES) {
+    const response = await axios.get(BASESCAN_API_URL(address));
+    const tokenBalance = parseInt(response.data.result);
+    console.log(`Liquidity Pool Address: ${address}, Token Balance: ${tokenBalance}`);
+    poolSupply += tokenBalance;
+    await new Promise(resolve => setTimeout(resolve, delay));
+}
 
+        poolSupply /= 1e18; // Adjust this based on the token's decimals
         const cacheDuration = 15 * 60 * 1000; // Cache for 15 minutes
         cache.put('poolSupply', { poolSupply }, cacheDuration);
         res.json({ poolSupply });
