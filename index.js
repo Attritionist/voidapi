@@ -2,8 +2,10 @@ const express = require('express');
 const axios = require('axios');
 const rateLimit = require('express-rate-limit');
 const cache = require('memory-cache');
+const { ethers } = require('ethers');
 const app = express();
 const port = 3000;
+
 const BASESCAN_API_KEY = process.env["BASESCAN_API_KEY"];
 const MAX_SUPPLY = 100000000; // Set your actual max supply here
 const BURN_WALLET = '0x0000000000000000000000000000000000000000';
@@ -30,8 +32,16 @@ const LIQUIDITY_POOL_ADDRESSES = [
     '0xEd8a52E5B3A244Cad7cd03dd1Cc2a0cfC1281148',
     '0xADD6ffB462D039aCbAB7040Ae69203EE087e2a76',
 ];
-
+// New constants for YANG contract
+const YANG_ADDRESS = '0x09E9F93f3ec0f17709F9974A9603C1223076A9cf';
+const YANG_ABI = [
+  "function getCurrentHour() public view returns (uint256)",
+  "function getBlockData(uint256 _hour) public view returns (uint256 _yangPrice, uint256 _growthRate, uint256 _change, uint256 _created)"
+];
+const BASE_RPC_URL = 'https://mainnet.base.org';
 const BASESCAN_API_URL = (address) => `https://api.basescan.org/api?module=account&action=tokenbalance&contractaddress=${VOID_CONTRACT_ADDRESS}&address=${address}&tag=latest&apikey=${BASESCAN_API_KEY}`;
+const provider = new ethers.JsonRpcProvider(BASE_RPC_URL);
+const yangContract = new ethers.Contract(YANG_ADDRESS, YANG_ABI, provider);
 
 const limiter = rateLimit({
     windowMs: 10 * 60 * 1000, // 10 minutes
@@ -83,6 +93,32 @@ app.get('/api/pool-supply', async (req, res) => {
         res.json({ poolSupply });
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error', details: error.message });
+    }
+});
+// New endpoint for YANG data
+app.get('/api/yang-data', async (req, res) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    const cachedResponse = cache.get('yangData');
+    if (cachedResponse) {
+        return res.json(cachedResponse);
+    }
+    try {
+        const currentHour = await yangContract.getCurrentHour();
+        const blockData = await yangContract.getBlockData(currentHour);
+
+        const yangData = {
+            yangPrice: ethers.formatUnits(blockData._yangPrice, 8),
+            growthRate: ethers.formatUnits(blockData._growthRate, 4),
+            currentHour: currentHour.toString()
+        };
+
+        const cacheDuration = 1 * 60 * 1000; // Cache for 1 minute
+        cache.put('yangData', yangData, cacheDuration);
+
+        res.json(yangData);
+    } catch (error) {
+        console.error('Error fetching YANG data:', error);
+        res.status(500).json({ error: 'Failed to fetch YANG data', details: error.message });
     }
 });
 
