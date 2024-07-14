@@ -44,8 +44,8 @@ const provider = new ethers.JsonRpcProvider(BASE_RPC_URL);
 const yangContract = new ethers.Contract(YANG_ADDRESS, YANG_ABI, provider);
 
 const limiter = rateLimit({
-    windowMs: 10 * 60 * 1000, // 10 minutes
-    max: 10000 // limit each IP to 10000 requests per windowMs
+    windowMs: 5 * 60 * 1000, // 10 minutes
+    max: 20000 // limit each IP to 10000 requests per windowMs
 });
 
 // Apply the rate limiting middleware to all requests
@@ -61,7 +61,7 @@ app.get('/api/circulating-supply', async (req, res) => {
         const response = await axios.get(BASESCAN_API_URL(BURN_WALLET));
         const burnedTokens = parseInt(response.data.result) / 1e18; // Adjust this based on the token's decimals
         const circulatingSupply = MAX_SUPPLY - burnedTokens;
-        const cacheDuration = 30 * 60 * 1000; // Cache for 30 minutes
+        const cacheDuration = 20 * 60 * 1000; // Cache for 30 minutes
         cache.put('circulatingSupply', { circulatingSupply }, cacheDuration);3
         res.json({ circulatingSupply });
     } catch (error) {
@@ -76,7 +76,7 @@ app.get('/api/pool-supply', async (req, res) => {
         return res.json(cachedResponse);
     }
     try {
-        const delay = 100
+        const delay = 125
         let poolSupply = 0;
 
         for (const address of LIQUIDITY_POOL_ADDRESSES) {
@@ -88,7 +88,7 @@ app.get('/api/pool-supply', async (req, res) => {
 }
 
         poolSupply /= 1e18; // Adjust this based on the token's decimals
-        const cacheDuration = 10 * 60 * 1000; // Cache for 15 minutes
+        const cacheDuration = 5 * 60 * 1000; // Cache for 10 minutes
         cache.put('poolSupply', { poolSupply }, cacheDuration);
         res.json({ poolSupply });
     } catch (error) {
