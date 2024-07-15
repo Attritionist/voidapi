@@ -33,7 +33,7 @@ const LIQUIDITY_POOL_ADDRESSES = [
     '0xADD6ffB462D039aCbAB7040Ae69203EE087e2a76',
 ];
 // New constants for YANG contract
-const YANG_ADDRESS = '0x09E9F93f3ec0f17709F9974A9603C1223076A9cf';
+const YANG_ADDRESS = '0x15ba6B7A033262DA204cCCDAf7dB650167B42C05';
 const YANG_ABI = [
   "function getCurrentHour() public view returns (uint256)",
   "function getBlockData(uint256 _hour) public view returns (uint256 _yangPrice, uint256 _growthRate, uint256 _change, uint256 _created)"
