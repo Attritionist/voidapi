@@ -192,11 +192,7 @@ async function getYinTotalSupply() {
     const yangCirculatingSupply = ethers.formatUnits(totalSupply, 8);
     const yinTotalSupplyValue = parseFloat(yangCirculatingSupply) * parseFloat(yangToYinRatio);
 
-    const result = {
-      yangToYinRatio,
-      yangCirculatingSupply,
-      yinTotalSupplyValue: yinTotalSupplyValue.toFixed(8)
-    };
+    const result = yinTotalSupplyValue.toFixed(8);
 
     // Cache for 1 minute
     cache.put('yinTotalSupply', result, 60 * 1000);
@@ -208,12 +204,12 @@ async function getYinTotalSupply() {
   }
 }
 
-// New endpoint to serve YIN total supply data
+
 app.get('/api/yin-total-supply', async (req, res) => {
   res.header('Access-Control-Allow-Origin', '*');
   try {
-    const data = await getYinTotalSupply();
-    res.json(data);
+    const yinTotalSupply = await getYinTotalSupply();
+    res.json({ yinTotalSupply });
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch YIN total supply', details: error.message });
   }
