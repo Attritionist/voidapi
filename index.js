@@ -34,14 +34,15 @@ const LIQUIDITY_POOL_ADDRESSES = [
     '0xEd8a52E5B3A244Cad7cd03dd1Cc2a0cfC1281148',
     '0xADD6ffB462D039aCbAB7040Ae69203EE087e2a76',
 ];
-// New constants for YANG contract
+// Constants for YANG contract
 const YANG_ADDRESS = '0x384C9c33737121c4499C85D815eA57D1291875Ab';
 const YIN_ADDRESS = '0xeCb36fF12cbe4710E9Be2411de46E6C180a4807f';
 const YANG_INITIAL_SUPPLY = 2500000; // 2.5 million
 const YANG_ABI = [
   "function getCurrentHour() public view returns (uint256)",
   "function getBlockData(uint256 _hour) public view returns (uint256 _yangPrice, uint256 _growthRate, uint256 _change, uint256 _created)",
-  "function totalSupply() public view returns (uint256)"
+  "function totalSupply() public view returns (uint256)",
+  "function getCurrentPrice() public view returns (uint256)"
 ];
 const YIN_ABI = [
   "function totalSupply() public view returns (uint256)"
@@ -53,8 +54,8 @@ const yangContract = new ethers.Contract(YANG_ADDRESS, YANG_ABI, provider);
 const yinContract = new ethers.Contract(YIN_ADDRESS, YIN_ABI, provider);
 
 const limiter = rateLimit({
-    windowMs: 5 * 60 * 1000, // 10 minutes
-    max: 20000 // limit each IP to 10000 requests per windowMs
+    windowMs: 5 * 60 * 1000, // 5 minutes
+    max: 20000 // limit each IP to 20000 requests per windowMs
 });
 
 // Apply the rate limiting middleware to all requests
@@ -83,8 +84,8 @@ app.get('/api/circulating-supply', async (req, res) => {
         const response = await axios.get(BASESCAN_API_URL(BURN_WALLET));
         const burnedTokens = parseInt(response.data.result) / 1e18; // Adjust this based on the token's decimals
         const circulatingSupply = MAX_SUPPLY - burnedTokens;
-        const cacheDuration = 20 * 60 * 1000; // Cache for 30 minutes
-        cache.put('circulatingSupply', { circulatingSupply }, cacheDuration);3
+        const cacheDuration = 20 * 60 * 1000; // Cache for 20 minutes
+        cache.put('circulatingSupply', { circulatingSupply }, cacheDuration);
         res.json({ circulatingSupply });
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error', details: error.message });
@@ -102,22 +103,22 @@ app.get('/api/pool-supply', async (req, res) => {
         let poolSupply = 0;
 
         for (const address of LIQUIDITY_POOL_ADDRESSES) {
-    const response = await axios.get(BASESCAN_API_URL(address));
-    const tokenBalance = parseInt(response.data.result);
-    console.log(`Liquidity Pool Address: ${address}, Token Balance: ${tokenBalance}`);
-    poolSupply += tokenBalance;
-    await new Promise(resolve => setTimeout(resolve, delay));
-}
+            const response = await axios.get(BASESCAN_API_URL(address));
+            const tokenBalance = parseInt(response.data.result);
+            console.log(`Liquidity Pool Address: ${address}, Token Balance: ${tokenBalance}`);
+            poolSupply += tokenBalance;
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
 
         poolSupply /= 1e18; // Adjust this based on the token's decimals
-        const cacheDuration = 5 * 60 * 1000; // Cache for 10 minutes
+        const cacheDuration = 5 * 60 * 1000; // Cache for 5 minutes
         cache.put('poolSupply', { poolSupply }, cacheDuration);
         res.json({ poolSupply });
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error', details: error.message });
     }
 });
-// New endpoint for YANG data
+
 app.get('/api/yang-data', async (req, res) => {
     res.header('Access-Control-Allow-Origin', '*');
     const cachedResponse = cache.get('yangData');
@@ -172,6 +173,50 @@ app.get('/api/yin-data', async (req, res) => {
         console.error('Error fetching YIN data:', error);
         res.status(500).json({ error: 'Failed to fetch YIN data', details: error.message });
     }
+});
+
+// New function to get YIN total supply based on YANG data
+async function getYinTotalSupply() {
+  const cachedData = cache.get('yinTotalSupply');
+  if (cachedData) {
+    return cachedData;
+  }
+
+  try {
+    const [currentPrice, totalSupply] = await Promise.all([
+      yangContract.getCurrentPrice(),
+      yangContract.totalSupply()
+    ]);
+
+    const yangToYinRatio = ethers.formatUnits(currentPrice, 8);
+    const yangCirculatingSupply = ethers.formatUnits(totalSupply, 8);
+    const yinTotalSupplyValue = parseFloat(yangCirculatingSupply) * parseFloat(yangToYinRatio);
+
+    const result = {
+      yangToYinRatio,
+      yangCirculatingSupply,
+      yinTotalSupplyValue: yinTotalSupplyValue.toFixed(8)
+    };
+
+    // Cache for 1 minute
+    cache.put('yinTotalSupply', result, 60 * 1000);
+
+    return result;
+  } catch (error) {
+    console.error('Error calculating YIN total supply:', error);
+    throw error;
+  }
+}
+
+// New endpoint to serve YIN total supply data
+app.get('/api/yin-total-supply', async (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  try {
+    const data = await getYinTotalSupply();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch YIN total supply', details: error.message });
+  }
 });
 
 app.listen(port, () => {
