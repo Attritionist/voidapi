@@ -151,7 +151,7 @@ app.get('/api/yang-data', async (req, res) => {
     }
 });
 
-app.get('/api/yin-data', async (req, res) => {
+app.get('/api/yin-circulating-supply', async (req, res) => {
     res.header('Access-Control-Allow-Origin', '*');
     const cachedResponse = cache.get('yinData');
     if (cachedResponse) {
