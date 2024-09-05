@@ -12,10 +12,7 @@ const BURN_WALLET = '0x0000000000000000000000000000000000000000';
 const VOID_CONTRACT_ADDRESS = '0x21eceaf3bf88ef0797e3927d855ca5bb569a47fc';
 const LIQUIDITY_POOL_ADDRESSES = [
     '0xb14e941d34d61ae251ccc08ac15b8455ae9f60a5',
-    '0xa79e45668972e13cdb6c9ed1debfc5b0d04cb0bd',
-    '0x87ff47f95837ee2903a725436d4e924511452111',
     '0x53a1d9ad828d2ac5f67007738cc5688a753241ba',
-    '0x9858271D467e1786C5035618BFa30c18C7D4b215',
     '0x6d8b0d8825f8c8a885a2809fbf03983a9430f999',
     '0xa2b01d461b811096eab039f0283655326440e78f',
     '0x4ddf7d913e218c2ae6d13036793ad815d37fac7e',
@@ -27,11 +24,9 @@ const LIQUIDITY_POOL_ADDRESSES = [
     '0xe5fe953ca480d0a7b22ed664a7370a36038c13ae',
     '0xf2de7d73e8e56822afdf19fd08d999c78abd933b',
     '0x66fa42cfd1789aa7f87c1ef988bf04cb145c9465',
-    '0x928be5748ea9d03925a3b5f85e3a5e2502cd7bcf',
     '0x1f43031a6294b9c2219887c9e9f5b3671433df3c',
     '0x7377ff4f6ac21c1be5d943482b3c439d080f65c1',
     '0x39f0c947fcea3ca8aa6b9eaa9045a95709b6f59a',
-    '0x3c0f2679210c0bc074682ecb83b9e7d39411c478',
     '0xA6d470b00963c0c082E93c3E985D287e677A9477',
     '0xEd8a52E5B3A244Cad7cd03dd1Cc2a0cfC1281148',
     '0xADD6ffB462D039aCbAB7040Ae69203EE087e2a76',
@@ -101,7 +96,7 @@ app.get('/api/pool-supply', async (req, res) => {
         return res.json(cachedResponse);
     }
     try {
-        const delay = 125
+        const delay = 150
         let poolSupply = 0;
 
         for (const address of LIQUIDITY_POOL_ADDRESSES) {
