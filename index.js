@@ -15,7 +15,6 @@ const LIQUIDITY_POOL_ADDRESSES = [
     '0x53a1d9ad828d2ac5f67007738cc5688a753241ba',
     '0x6d8b0d8825f8c8a885a2809fbf03983a9430f999',
     '0xa2b01d461b811096eab039f0283655326440e78f',
-    '0x4ddf7d913e218c2ae6d13036793ad815d37fac7e',
     '0x263ea0a3cf3845fc52a30c6e81dbd985b7290fbf',
     '0xf6820b05e43a8ac09d82d57d583837c243c81d35',
     '0xA0ecC6ef7C4e6aE8fC61c0B4daD2Ec86c20f7f86',
@@ -29,7 +28,6 @@ const LIQUIDITY_POOL_ADDRESSES = [
     '0x39f0c947fcea3ca8aa6b9eaa9045a95709b6f59a',
     '0xA6d470b00963c0c082E93c3E985D287e677A9477',
     '0xEd8a52E5B3A244Cad7cd03dd1Cc2a0cfC1281148',
-    '0xADD6ffB462D039aCbAB7040Ae69203EE087e2a76',
 ];
 // Constants for YANG contract
 const YANG_ADDRESS = '0x384C9c33737121c4499C85D815eA57D1291875Ab';
@@ -96,7 +94,7 @@ app.get('/api/pool-supply', async (req, res) => {
         return res.json(cachedResponse);
     }
     try {
-        const delay = 150
+        const delay = 250
         let poolSupply = 0;
 
         for (const address of LIQUIDITY_POOL_ADDRESSES) {
