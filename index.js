@@ -94,7 +94,7 @@ app.get('/api/pool-supply', async (req, res) => {
         return res.json(cachedResponse);
     }
     try {
-        const delay = 333
+        const delay = 500
         let poolSupply = 0;
 
         for (const address of LIQUIDITY_POOL_ADDRESSES) {
