@@ -5,29 +5,33 @@ const cache = require('memory-cache');
 const { ethers } = require('ethers');
 const app = express();
 const port = 3000;
+const STATIC_POOL_SUPPLY_ADDITION = 41000;
 
 const BASESCAN_API_KEY = process.env["BASESCAN_API_KEY"];
 const MAX_SUPPLY = 100000000; // Set your actual max supply here
 const BURN_WALLET = '0x0000000000000000000000000000000000000000';
 const VOID_CONTRACT_ADDRESS = '0x21eceaf3bf88ef0797e3927d855ca5bb569a47fc';
 const LIQUIDITY_POOL_ADDRESSES = [
-    '0xb14e941d34d61ae251ccc08ac15b8455ae9f60a5',
-    '0x53a1d9ad828d2ac5f67007738cc5688a753241ba',
-    '0xa2b01d461b811096eab039f0283655326440e78f',
-    '0x263ea0a3cf3845fc52a30c6e81dbd985b7290fbf',
-    '0x1b97dcc48648299d764e5465fea5e76a56154b42',
-    '0xf6820b05e43a8ac09d82d57d583837c243c81d35',
-    '0xA0ecC6ef7C4e6aE8fC61c0B4daD2Ec86c20f7f86',
-    '0xf83fc6aa70cbcb221e22e77c1fe831259c6cd68c',
-    '0x15539e7fe9842a53c6fd578345e15ccca80aa253',
-    '0x0abf279c2313a1ceb175ad0094a117f27a350aad',
-    '0xe5fe953ca480d0a7b22ed664a7370a36038c13ae',
-    '0xf2de7d73e8e56822afdf19fd08d999c78abd933b',
-    '0x1f43031a6294b9c2219887c9e9f5b3671433df3c',
-    '0x7377ff4f6ac21c1be5d943482b3c439d080f65c1',
-    '0x39f0c947fcea3ca8aa6b9eaa9045a95709b6f59a',
+    '0xB14e941D34d61ae251Ccc08AC15B8455AE9F60A5',
+    '0x1B97dcC48648299D764E5465FeA5e76A56154B42',
+    '0x4ddf7D913E218c2Ae6d13036793AD815d37Fac7E',
+    '0x9858271D467e1786C5035618BFa30c18C7D4b215',
+    '0x263Ea0A3cF3845Fc52a30c6E81DBd985B7290fBf',
+    '0x1F43031a6294b9C2219887C9E9F5b3671433df3c',
     '0xA6d470b00963c0c082E93c3E985D287e677A9477',
+    '0xF2DE7d73e8e56822aFdF19FD08D999c78AbD933b',
+    '0xF6820B05E43a8aC09D82D57D583837C243C81d35',
+    '0xAF3e0fc1ad6907f885e063E181C248983feE1459',
+    '0x15539E7FE9842a53c6fD578345E15cccA80aa253',
+    '0x66FA42CfD1789AA7f87C1eF988bf04CB145c9465',
+    '0xa2b01D461B811096EAB039f0283655326440e78f',
+    '0x0abF279C2313A1CEB175ad0094A117F27A350AaD',
+    '0x7377FF4f6AC21C1Be5D943482B3c439d080f65c1',
+    '0xe5fe953ca480d0a7b22ED664a7370A36038c13aE',
+    '0xA0ecC6ef7C4e6aE8fC61c0B4daD2Ec86c20f7f86',
+    '0x39f0c947fcea3Ca8AA6B9eaA9045a95709B6F59a',
     '0xEd8a52E5B3A244Cad7cd03dd1Cc2a0cfC1281148',
+    '0xf83Fc6AA70cBcB221E22E77c1FE831259c6Cd68c',
 ];
 // Constants for YANG contract
 const YANG_ADDRESS = '0x384C9c33737121c4499C85D815eA57D1291875Ab';
@@ -42,7 +46,7 @@ const YANG_ABI = [
 const YIN_ABI = [
   "function totalSupply() public view returns (uint256)"
 ];
-const BASE_RPC_URL = 'https://mainnet.base.org';
+const BASE_RPC_URL = 'https://base-mainnet.g.alchemy.com/v2/cMtAjQC4y6PRsNa9E4QNiwiAexSLvp7I';
 const BASESCAN_API_URL = (address) => `https://api.basescan.org/api?module=account&action=tokenbalance&contractaddress=${VOID_CONTRACT_ADDRESS}&address=${address}&tag=latest&apikey=${BASESCAN_API_KEY}`;
 const provider = new ethers.JsonRpcProvider(BASE_RPC_URL);
 const yangContract = new ethers.Contract(YANG_ADDRESS, YANG_ABI, provider);
@@ -79,7 +83,7 @@ app.get('/api/circulating-supply', async (req, res) => {
         const response = await axios.get(BASESCAN_API_URL(BURN_WALLET));
         const burnedTokens = parseInt(response.data.result) / 1e18; // Adjust this based on the token's decimals
         const circulatingSupply = MAX_SUPPLY - burnedTokens;
-        const cacheDuration = 20 * 60 * 1000; // Cache for 20 minutes
+        const cacheDuration = 30 * 60 * 1000; // Cache for 20 minutes
         cache.put('circulatingSupply', { circulatingSupply }, cacheDuration);
         res.json({ circulatingSupply });
     } catch (error) {
@@ -94,7 +98,7 @@ app.get('/api/pool-supply', async (req, res) => {
         return res.json(cachedResponse);
     }
     try {
-        const delay = 500
+        const delay = 500;
         let poolSupply = 0;
 
         for (const address of LIQUIDITY_POOL_ADDRESSES) {
@@ -105,8 +109,8 @@ app.get('/api/pool-supply', async (req, res) => {
             await new Promise(resolve => setTimeout(resolve, delay));
         }
 
-        poolSupply /= 1e18; // Adjust this based on the token's decimals
-        const cacheDuration = 5 * 60 * 1000; // Cache for 5 minutes
+        poolSupply = poolSupply / 1e18 + STATIC_POOL_SUPPLY_ADDITION; // Add the static amount
+        const cacheDuration = 10 * 60 * 1000; // Cache for 10 minutes
         cache.put('poolSupply', { poolSupply }, cacheDuration);
         res.json({ poolSupply });
     } catch (error) {
