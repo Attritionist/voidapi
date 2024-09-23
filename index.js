@@ -5,7 +5,6 @@ const cache = require('memory-cache');
 const { ethers } = require('ethers');
 const app = express();
 const port = 3000;
-const STATIC_POOL_SUPPLY_ADDITION = 41000;
 
 const BASESCAN_API_KEY = process.env["BASESCAN_API_KEY"];
 const MAX_SUPPLY = 100000000; // Set your actual max supply here
@@ -100,21 +99,21 @@ app.get('/api/pool-supply', async (req, res) => {
         const delay = 500;
         let poolSupply = 0;
 
-        for (const address of LIQUIDITY_POOL_ADDRESSES) {
-            const response = await axios.get(BASESCAN_API_URL(address));
-            const tokenBalance = parseInt(response.data.result);
-            console.log(`Liquidity Pool Address: ${address}, Token Balance: ${tokenBalance}`);
-            poolSupply += tokenBalance;
-            await new Promise(resolve => setTimeout(resolve, delay));
-        }
-
-        poolSupply = poolSupply / 1e18 + STATIC_POOL_SUPPLY_ADDITION; // Add the static amount
-        const cacheDuration = 10 * 60 * 1000; // Cache for 10 minutes
-        cache.put('poolSupply', { poolSupply }, cacheDuration);
-        res.json({ poolSupply });
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error', details: error.message });
+         for (const address of LIQUIDITY_POOL_ADDRESSES) {
+        const response = await axios.get(BASESCAN_API_URL(address));
+        const tokenBalance = parseInt(response.data.result);
+        console.log(Liquidity Pool Address: ${address}, Token Balance: ${tokenBalance});
+        poolSupply += tokenBalance;
+        await new Promise(resolve => setTimeout(resolve, delay));
     }
+
+    poolSupply /= 1e18; // Adjust this based on the token's decimals
+    const cacheDuration = 10 * 60 * 1000; // Cache for 5 minutes
+    cache.put('poolSupply', { poolSupply }, cacheDuration);
+    res.json({ poolSupply });
+} catch (error) {
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
+}
 });
 
 app.get('/api/yang-data', async (req, res) => {
