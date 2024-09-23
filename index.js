@@ -89,25 +89,33 @@ app.get('/api/circulating-supply', async (req, res) => {
     }
 });
 
-app.get('/api/pool-supply', async (req, res) => { res.header('Access-Control-Allow-Origin', '*'); const cachedResponse = cache.get('poolSupply'); if (cachedResponse) { return res.json(cachedResponse); } try { const delay = 500 let poolSupply = 0;
-
-
-    for (const address of LIQUIDITY_POOL_ADDRESSES) {
-        const response = await axios.get(BASESCAN_API_URL(address));
-        const tokenBalance = parseInt(response.data.result);
-        console.log(Liquidity Pool Address: ${address}, Token Balance: ${tokenBalance});
-        poolSupply += tokenBalance;
-        await new Promise(resolve => setTimeout(resolve, delay));
+app.get('/api/pool-supply', async (req, res) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    const cachedResponse = cache.get('poolSupply');
+    if (cachedResponse) {
+        return res.json(cachedResponse);
     }
+    try {
+        const delay = 500
+        let poolSupply = 0;
 
-    poolSupply /= 1e18; // Adjust this based on the token's decimals
-    const cacheDuration = 10 * 60 * 1000; // Cache for 5 minutes
-    cache.put('poolSupply', { poolSupply }, cacheDuration);
-    res.json({ poolSupply });
-} catch (error) {
-    res.status(500).json({ error: 'Internal Server Error', details: error.message });
-}
+        for (const address of LIQUIDITY_POOL_ADDRESSES) {
+            const response = await axios.get(BASESCAN_API_URL(address));
+            const tokenBalance = parseInt(response.data.result);
+            console.log(`Liquidity Pool Address: ${address}, Token Balance: ${tokenBalance}`);
+            poolSupply += tokenBalance;
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+
+        poolSupply /= 1e18; // Adjust this based on the token's decimals
+        const cacheDuration = 5 * 60 * 1000; // Cache for 5 minutes
+        cache.put('poolSupply', { poolSupply }, cacheDuration);
+        res.json({ poolSupply });
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error', details: error.message });
+    }
 });
+
 
 app.get('/api/yang-data', async (req, res) => {
     res.header('Access-Control-Allow-Origin', '*');
