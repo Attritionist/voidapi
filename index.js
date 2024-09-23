@@ -81,7 +81,7 @@ app.get('/api/circulating-supply', async (req, res) => {
         const response = await axios.get(BASESCAN_API_URL(BURN_WALLET));
         const burnedTokens = parseInt(response.data.result) / 1e18; // Adjust this based on the token's decimals
         const circulatingSupply = MAX_SUPPLY - burnedTokens;
-        const cacheDuration = 30 * 60 * 1000; // Cache for 20 minutes
+        const cacheDuration = 20 * 60 * 1000; // Cache for 20 minutes
         cache.put('circulatingSupply', { circulatingSupply }, cacheDuration);
         res.json({ circulatingSupply });
     } catch (error) {
@@ -96,7 +96,7 @@ app.get('/api/pool-supply', async (req, res) => {
         return res.json(cachedResponse);
     }
     try {
-        const delay = 666
+        const delay = 750
         let poolSupply = 0;
 
         for (const address of LIQUIDITY_POOL_ADDRESSES) {
@@ -108,7 +108,7 @@ app.get('/api/pool-supply', async (req, res) => {
         }
 
         poolSupply /= 1e18; // Adjust this based on the token's decimals
-        const cacheDuration = 30 * 60 * 1000; // Cache for 5 minutes
+        const cacheDuration = 30 * 60 * 1000; // Cache for 30 minutes
         cache.put('poolSupply', { poolSupply }, cacheDuration);
         res.json({ poolSupply });
     } catch (error) {
@@ -139,7 +139,7 @@ app.get('/api/yang-data', async (req, res) => {
             burnedAmount: burnedAmount.toFixed(8)
         };
 
-        const cacheDuration = 1 * 60 * 1000; // Cache for 1 minute
+        const cacheDuration = 5 * 60 * 1000; // Cache for 5 minute
         cache.put('yangData', yangData, cacheDuration);
 
         res.json(yangData);
@@ -163,7 +163,7 @@ app.get('/api/yin-circulating-supply', async (req, res) => {
             circulatingSupply
         };
 
-        const cacheDuration = 5 * 60 * 1000; // Cache for 5 minutes
+        const cacheDuration = 10 * 60 * 1000; // Cache for 10 minutes
         cache.put('yinData', yinData, cacheDuration);
 
         res.json(yinData);
@@ -192,8 +192,8 @@ async function getYinTotalSupply() {
 
     const result = yinTotalSupplyValue.toFixed(8);
 
-    // Cache for 1 minute
-    cache.put('yinTotalSupply', result, 60 * 1000);
+    // Cache for 5 minute
+    cache.put('yinTotalSupply', result, 5 * 60 * 1000);
 
     return result;
   } catch (error) {
