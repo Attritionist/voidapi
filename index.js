@@ -96,7 +96,7 @@ app.get('/api/pool-supply', async (req, res) => {
         return res.json(cachedResponse);
     }
     try {
-        const delay = 500
+        const delay = 666
         let poolSupply = 0;
 
         for (const address of LIQUIDITY_POOL_ADDRESSES) {
@@ -108,7 +108,7 @@ app.get('/api/pool-supply', async (req, res) => {
         }
 
         poolSupply /= 1e18; // Adjust this based on the token's decimals
-        const cacheDuration = 5 * 60 * 1000; // Cache for 5 minutes
+        const cacheDuration = 30 * 60 * 1000; // Cache for 5 minutes
         cache.put('poolSupply', { poolSupply }, cacheDuration);
         res.json({ poolSupply });
     } catch (error) {
