@@ -89,17 +89,10 @@ app.get('/api/circulating-supply', async (req, res) => {
     }
 });
 
-app.get('/api/pool-supply', async (req, res) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    const cachedResponse = cache.get('poolSupply');
-    if (cachedResponse) {
-        return res.json(cachedResponse);
-    }
-    try {
-        const delay = 500;
-        let poolSupply = 0;
+app.get('/api/pool-supply', async (req, res) => { res.header('Access-Control-Allow-Origin', '*'); const cachedResponse = cache.get('poolSupply'); if (cachedResponse) { return res.json(cachedResponse); } try { const delay = 500 let poolSupply = 0;
 
-         for (const address of LIQUIDITY_POOL_ADDRESSES) {
+
+    for (const address of LIQUIDITY_POOL_ADDRESSES) {
         const response = await axios.get(BASESCAN_API_URL(address));
         const tokenBalance = parseInt(response.data.result);
         console.log(Liquidity Pool Address: ${address}, Token Balance: ${tokenBalance});
